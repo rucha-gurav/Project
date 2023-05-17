@@ -1,0 +1,43 @@
+import requests
+import time
+
+# Datadog API credentials
+API_KEY = 'YOUR_API_KEY'
+APP_KEY = 'YOUR_APP_KEY'
+
+# Datadog API endpoint
+LOGS_ENDPOINT = "https://api.datadoghq.com/api/v1/logs-queries"
+
+# Start and end timestamps for the desired timeframe
+start_time = int(time.mktime(time.strptime("2023-05-15 00:00:00", "%Y-%m-%d %H:%M:%S")))
+end_time = int(time.mktime(time.strptime("2023-05-16 23:59:59", "%Y-%m-%d %H:%M:%S")))
+
+# Query to fetch logs within the timeframe
+query = f"service:my_service AND @timestamp >= {start_time} AND @timestamp <= {end_time}"
+
+# Datadog API request headers
+headers = {
+    'Content-Type': 'application/json',
+    'DD-API-KEY': API_KEY,
+    'DD-APPLICATION-KEY': APP_KEY
+}
+
+# Datadog API request body
+body = {
+    "query": query,
+    "time": {
+        "from": start_time,
+        "to": end_time
+    }
+}
+
+# Send the API request to fetch logs
+response = requests.post(LOGS_ENDPOINT, headers=headers, json=body)
+logs_data = response.json()
+
+# Process the logs
+for log in logs_data['logs']:
+    timestamp = log['timestamp']
+    message = log['content']
+    print(f"[{timestamp}] {message}")
+ 
